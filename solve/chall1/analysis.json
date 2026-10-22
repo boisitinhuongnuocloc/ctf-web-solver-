@@ -1,0 +1,38 @@
+{
+  "name": "chall1",
+  "tech_stack": [
+    "PHP",
+    "nginx"
+  ],
+  "category": "Web",
+  "is_client_side": false,
+  "has_bot": false,
+  "flag_location_hints": [
+    "Copy flag",
+    "COPY flag"
+  ],
+  "exposed_ports": [
+    "80"
+  ],
+  "dangerous_sinks": [
+    {
+      "file": "challenge\\models\\TimeModel.php",
+      "line": 11,
+      "vuln_class": "Command Injection / RCE",
+      "snippet": "unction getTime()     {         $time = exec($this->command);         $res  = isset($time) ? $time : '?'; [CRITICAL: Target parameter is inside single quotes '...'. Exploit MUST break out using single-quote prefix like: '; cat /flag # or ' || cat /flag || ']"
+    }
+  ],
+  "routes": [
+    "/"
+  ],
+  "live_recon": [],
+  "files_analyzed": [
+    "Dockerfile",
+    "challenge\\index.php",
+    "challenge\\Router.php",
+    "challenge\\controllers\\TimeController.php",
+    "challenge\\models\\TimeModel.php",
+    "challenge\\views\\index.php"
+  ],
+  "summary_for_ai": "Target: chall1\nTech Stack: PHP, nginx\nCategory: Server-Side Web\nFlag Location Clues: Copy flag; COPY flag\nDetected Routes: /\nHigh-Priority Dangerous Sinks Identified:\n - [Command Injection / RCE] at challenge\\models\\TimeModel.php:L11 -> `unction getTime()     {         $time = exec($this->command);         $res  = isset($time) ? $time : '?'; [CRITICAL: Target parameter is inside single quotes '...'. Exploit MUST break out using single-quote prefix like: '; cat /flag # or ' || cat /flag || ']`"
+}

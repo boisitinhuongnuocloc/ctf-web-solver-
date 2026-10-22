@@ -1,0 +1,28 @@
+Tessera
+Web
+500
+pts
+0
+solves
+Challenge
+Solves
+
+The National Records Office replaced its 2009 help-desk portal last year. They replaced the front end.
+
+workspace: nro-helpdesk
+email:     h.saidi@records.gov.example
+PIN:       NRO2009
+
+Author: 99lives
+Your instance
+Online
+
+Your private challenge environment is ready.
+Time remaining29:30Expires at 05:57 PM
+Extensions available
+2
+before a new instance is needed
+Connection URL
+http://f82620193489.inst2.securinets.tn:8080
+Copy
+Extend time · 2 left

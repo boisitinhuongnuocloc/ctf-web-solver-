@@ -1,0 +1,39 @@
+{
+  "name": "chall",
+  "tech_stack": [
+    "Werkzeug/3.0.1 Python/3.11.8"
+  ],
+  "category": "Web",
+  "is_client_side": false,
+  "has_bot": false,
+  "flag_location_hints": [],
+  "exposed_ports": [],
+  "dangerous_sinks": [
+    {
+      "file": "/api/options",
+      "line": 1,
+      "vuln_class": "API Information Disclosure & Secret Command",
+      "snippet": "GET /api/options disclosed secret data: {\n  \"allPossibleCommands\": {\n    \"1\": [\n      \"HEAD NORTH\",\n      \"HEAD WEST\",\n      \"HEAD EAST\",\n      \"HEAD SOUTH\"\n    ],\n    \"2\": [\n      \"GO DEEPER INTO THE FOREST\",\n      \"FOLLOW A MYSTERIOUS PATH\",\n      \"CLIMB A TREE\",\n      \"TURN BACK\"\n    ],\n    \"3\": [\n      \"EXPLORE A C"
+    },
+    {
+      "file": "/static/terminal/js/main.js",
+      "line": 1,
+      "vuln_class": "JSON API Command / Secret Parameter",
+      "snippet": "POST /api/monitor with headers={'Content-Type': 'application/json'}, json={'command': currentCommand}. Send secret command/payload extracted from API or parameters."
+    }
+  ],
+  "routes": [
+    "/",
+    "/api/monitor",
+    "/api/options"
+  ],
+  "live_recon": [
+    "Page / has textarea: user-text-input",
+    "Discovered API endpoint in /static/terminal/js/main.js: /api/monitor",
+    "Discovered API endpoint in /static/terminal/js/main.js: /api/options",
+    "API /api/options returned JSON: {\n  \"allPossibleCommands\": {\n    \"1\": [\n      \"HEAD NORTH\",\n      \"HEAD WEST\",\n      \"HEAD EAST\",\n      \"HEAD SOUTH\"\n    ],\n    \"2\": [\n      \"GO DEEPER INTO THE FOREST\",\n      \"FOLLOW A MYSTERIOUS PATH\",\n      \"CLIMB A TREE\",\n      \"TURN BACK\"\n    ],\n    \"3\": [\n      \"EXPLORE A CAVE\",\n      \"CROSS A",
+    "Target API Endpoint: POST /api/monitor with headers={'Content-Type': 'application/json'}, body: {'command': currentCommand}"
+  ],
+  "files_analyzed": [],
+  "summary_for_ai": "Target: chall\nTech Stack: Werkzeug/3.0.1 Python/3.11.8\nCategory: Server-Side Web\nDetected Routes: /, /api/monitor, /api/options\nHigh-Priority Dangerous Sinks Identified:\n - [API Information Disclosure & Secret Command] at /api/options:L1 -> `GET /api/options disclosed secret data: {\n  \"allPossibleCommands\": {\n    \"1\": [\n      \"HEAD NORTH\",\n      \"HEAD WEST\",\n      \"HEAD EAST\",\n      \"HEAD SOUTH\"\n    ],\n    \"2\": [\n      \"GO DEEPER INTO THE FOREST\",\n      \"FOLLOW A MYSTERIOUS PATH\",\n      \"CLIMB A TREE\",\n      \"TURN BACK\"\n    ],\n    \"3\": [\n      \"EXPLORE A C`\n - [JSON API Command / Secret Parameter] at /static/terminal/js/main.js:L1 -> `POST /api/monitor with headers={'Content-Type': 'application/json'}, json={'command': currentCommand}. Send secret command/payload extracted from API or parameters.`\nLive Target Reconnaissance Results:\n - Page / has textarea: user-text-input\n - Discovered API endpoint in /static/terminal/js/main.js: /api/monitor\n - Discovered API endpoint in /static/terminal/js/main.js: /api/options\n - API /api/options returned JSON: {\n  \"allPossibleCommands\": {\n    \"1\": [\n      \"HEAD NORTH\",\n      \"HEAD WEST\",\n      \"HEAD EAST\",\n      \"HEAD SOUTH\"\n    ],\n    \"2\": [\n      \"GO DEEPER INTO THE FOREST\",\n      \"FOLLOW A MYSTERIOUS PATH\",\n      \"CLIMB A TREE\",\n      \"TURN BACK\"\n    ],\n    \"3\": [\n      \"EXPLORE A CAVE\",\n      \"CROSS A\n - Target API Endpoint: POST /api/monitor with headers={'Content-Type': 'application/json'}, body: {'command': currentCommand}"
+}

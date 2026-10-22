@@ -1,0 +1,46 @@
+{
+  "name": "web",
+  "tech_stack": [],
+  "category": "Web",
+  "is_client_side": false,
+  "has_bot": false,
+  "flag_location_hints": [],
+  "exposed_ports": [],
+  "dangerous_sinks": [
+    {
+      "file": "/assets/app.js",
+      "line": 1,
+      "vuln_class": "JSON API Command / Secret Parameter",
+      "snippet": "POST /api with headers={'Content-Type': 'application/json'}, json={command: <secret_or_payload>}. Send secret command/payload extracted from API or parameters."
+    }
+  ],
+  "routes": [
+    "/",
+    "/api",
+    "/api/reports/volume.csv",
+    "/api/reports/agents.csv",
+    "/admin/org",
+    "/admin/users",
+    "/admin/rules",
+    "/admin/rules/",
+    "/admin/tokens",
+    "/admin/invites",
+    "/api/admin/sso/continue?next=/"
+  ],
+  "live_recon": [
+    "Page / has inputs: org, email, pin",
+    "Discovered API endpoint in /assets/app.js: /api",
+    "Discovered API endpoint in /assets/app.js: /api/reports/volume.csv",
+    "Discovered API endpoint in /assets/app.js: /api/reports/agents.csv",
+    "Discovered API endpoint in /assets/app.js: /admin/org",
+    "Discovered API endpoint in /assets/app.js: /admin/users",
+    "Discovered API endpoint in /assets/app.js: /admin/rules",
+    "Discovered API endpoint in /assets/app.js: /admin/rules/",
+    "Discovered API endpoint in /assets/app.js: /admin/tokens",
+    "Discovered API endpoint in /assets/app.js: /admin/invites",
+    "Discovered API endpoint in /assets/app.js: /api/admin/sso/continue?next=/",
+    "Target API Endpoint: POST /api with headers={'Content-Type': 'application/json'}, body: {command: <secret_or_payload>}"
+  ],
+  "files_analyzed": [],
+  "summary_for_ai": "Target: web\nTech Stack: Unknown\nCategory: Server-Side Web\nDetected Routes: /, /api, /api/reports/volume.csv, /api/reports/agents.csv, /admin/org, /admin/users, /admin/rules, /admin/rules/, /admin/tokens, /admin/invites, /api/admin/sso/continue?next=/\nHigh-Priority Dangerous Sinks Identified:\n - [JSON API Command / Secret Parameter] at /assets/app.js:L1 -> `POST /api with headers={'Content-Type': 'application/json'}, json={command: <secret_or_payload>}. Send secret command/payload extracted from API or parameters.`\nLive Target Reconnaissance Results:\n - Page / has inputs: org, email, pin\n - Discovered API endpoint in /assets/app.js: /api\n - Discovered API endpoint in /assets/app.js: /api/reports/volume.csv\n - Discovered API endpoint in /assets/app.js: /api/reports/agents.csv\n - Discovered API endpoint in /assets/app.js: /admin/org\n - Discovered API endpoint in /assets/app.js: /admin/users\n - Discovered API endpoint in /assets/app.js: /admin/rules\n - Discovered API endpoint in /assets/app.js: /admin/rules/\n - Discovered API endpoint in /assets/app.js: /admin/tokens\n - Discovered API endpoint in /assets/app.js: /admin/invites\n - Discovered API endpoint in /assets/app.js: /api/admin/sso/continue?next=/\n - Target API Endpoint: POST /api with headers={'Content-Type': 'application/json'}, body: {command: <secret_or_payload>}"
+}
